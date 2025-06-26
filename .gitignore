@@ -30,6 +30,9 @@ category-frontend/node_modules/
 category-frontend/build/
 category-frontend/.env
 category-frontend/.DS_Store
+# Не комітити node_modules
+frontend/node_modules/
+
 
 # OS-specific
 .DS_Store

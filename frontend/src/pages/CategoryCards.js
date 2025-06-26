@@ -4,6 +4,7 @@ import { Card, Row, Col, Spin, Popconfirm, message } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const API_URL = 'http://localhost:8000/api/categories/';
 
@@ -19,19 +20,35 @@ const CategoryCards = () => {
     }
   }, [location.search, refetch]);
 
+  const { token } = useSelector((state) => state.auth);
   const handleDelete = (id) => {
-    axios.delete(`${API_URL}${id}/`)
-      .then(() => {
-        message.success('Категорію видалено');
-        refetch();
-      })
-      .catch(() => {
-        message.error('Помилка при видаленні');
-      });
-  };
+  if (!token) {
+    message.error('You need to login');
+    return;
+  }
+console.log('Tocken while deleting:', token);
+
+  axios.delete(`${API_URL}${id}/`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then(() => {
+      message.success('Category was deetd');
+      refetch();
+    })
+    .catch((error) => {
+      if (error.response && error.response.status === 401) {
+        message.error('You are not authorized');
+      } else {
+        message.error('Error while deleting');
+      }
+    });
+};
+
 
   if (isLoading) return <Spin size="large" />;
-  if (error) return <p>Помилка при завантаженні</p>;
+  if (error) return <p>Error while loding</p>;
 
   return (
     <Row gutter={[16, 16]}>

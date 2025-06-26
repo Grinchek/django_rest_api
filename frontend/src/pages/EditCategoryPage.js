@@ -1,73 +1,72 @@
-// src/pages/EditCategoryPage.js
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, message, Upload } from 'antd';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Form, Input, Button, Upload, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const API_URL = 'http://localhost:8000/api/categories/';
 
 const EditCategoryPage = () => {
   const [form] = Form.useForm();
+  const [initialData, setInitialData] = useState(null);
+  const [loading, setLoading] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
-  const [initialImage, setInitialImage] = useState(null);
+  const token = useSelector((state) => state.auth.token);
 
   useEffect(() => {
-    axios.get(`${API_URL}${id}/`)
+    axios.get(`${API_URL}${id}/`, {
+      headers: {Authorization: `Bearer ${token}`,},})
       .then(res => {
-        form.setFieldsValue(res.data);
-        if (res.data.image) {
-          setInitialImage([
-            {
-              uid: '-1',
-              name: 'current-image.png',
-              status: 'done',
-              url: res.data.image,
-            }
-          ]);
-        }
+        setInitialData(res.data);
+        form.setFieldsValue({
+          name: res.data.name,
+          slug: res.data.slug,
+          description: res.data.description,
+        });
       })
       .catch(() => {
         message.error('Category was not loaded');
       });
   }, [id, form]);
 
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
+    setLoading(true);
     const formData = new FormData();
     formData.append('name', values.name);
     formData.append('slug', values.slug);
     formData.append('description', values.description || '');
-
     if (values.image && values.image.file) {
       formData.append('image', values.image.file);
     }
 
-    axios.put(`${API_URL}${id}/`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-      .then(() => {
-        message.success('Category was edited');
-        navigate('/?refetch=1');
-      })
-      .catch(error => {
-        const err = error.response?.data;
-        if (err) {
-          Object.values(err).flat().forEach(msg => message.error(msg));
-        } else {
-          message.error('Error during editing category');
-        }
+    try {
+      await axios.put(`${API_URL}${id}/`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
       });
+      message.success('Category was updated');
+      navigate('/');
+    } catch (error) {
+      message.error('Error while updating');
+    } finally {
+      setLoading(false);
+    }
   };
 
+  if (!initialData) return <p>Loadng...</p>;
+
   return (
-    <div style={{ maxWidth: 600 ,margin: '0 auto'}}>
+    <div style={{ maxWidth: 600 }}>
       <h2>Edit category</h2>
       <Form
         form={form}
         layout="vertical"
         onFinish={onFinish}
-        initialValues={{ name: '', slug: '', description: '' }}
+        initialValues={initialData}
       >
         <Form.Item
           label="Name"
@@ -88,24 +87,18 @@ const EditCategoryPage = () => {
           <Input />
         </Form.Item>
 
-        <Form.Item label="Description" name="description">
+        <Form.Item label="Descrption" name="description">
           <Input.TextArea rows={4} />
         </Form.Item>
 
-        <Form.Item label="Image" name="image" valuePropName="file">
-          <Upload
-            name="image"
-            listType="picture"
-            maxCount={1}
-            defaultFileList={initialImage}
-            beforeUpload={() => false} // prevent auto upload
-          >
-            <Button icon={<UploadOutlined />}>Chose an image</Button>
+        <Form.Item label="New image" name="image" valuePropName="file">
+          <Upload beforeUpload={() => false} maxCount={1}>
+            <Button icon={<UploadOutlined />}>Chose file</Button>
           </Upload>
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" loading={loading}>
             Save changes
           </Button>
         </Form.Item>

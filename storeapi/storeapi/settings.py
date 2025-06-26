@@ -74,6 +74,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'storeapi.wsgi.application'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

@@ -25,7 +25,6 @@ from product.views import RegisterView
 from product.views import get_user
 from product.views import DeleteUserView
 
-
 router = routers.DefaultRouter()
 router.register('categories', CategoryViewSet,basename='catecory' )
 
@@ -38,5 +37,5 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/register/', RegisterView.as_view(), name='register'),
     path('api/user/', get_user, name='get_user'),
-    path('api/user/delete/', DeleteUserView.as_view()),
+    path('api/user/delete/', DeleteUserView.as_view(), name='delete-user'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

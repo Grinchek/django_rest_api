@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Card, Avatar, Typography, Button, Modal, Space, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../features/auth/authSlice';
-import 'antd/dist/reset.css';
+
 
 
 
@@ -19,7 +19,7 @@ const ProfilePage = () => {
     return <Title level={3}>Please log in to view your profile.</Title>;
   }
   const handleDelete = () => {
-  console.log("🧨 handleDelete викликано");
+  console.log({token});
 
   Modal.confirm({
     title: 'Do you really want to delete your profile?',
@@ -34,13 +34,15 @@ const ProfilePage = () => {
       }
 
       try {
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/user/delete/`, {
+       const res = await fetch(`${process.env.REACT_APP_API_URL}/api/user/delete/`, {
           method: 'DELETE',
           headers: {
-            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
         });
+
+
 
         const body = await res.text();
         console.log('Status:', res.status);

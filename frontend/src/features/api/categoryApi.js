@@ -18,8 +18,7 @@ export const categoryApi = createApi({
       query: () => 'categories/',
       providesTags: ['Category'],
     }),
-
-    createCategory: builder.mutation({ 
+    createCategory: builder.mutation({
       query: (formData) => ({
         url: 'categories/',
         method: 'POST',
@@ -27,10 +26,19 @@ export const categoryApi = createApi({
       }),
       invalidatesTags: ['Category'],
     }),
+    deleteCategory: builder.mutation({
+      query: (id) => ({
+        url: `categories/${id}/`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Category'],
+    }),
   }),
 });
 
+// ✅ ДОДАЙ ЦЕ СЮДИ
 export const {
   useGetCategoriesQuery,
   useCreateCategoryMutation,
+  useDeleteCategoryMutation,
 } = categoryApi;

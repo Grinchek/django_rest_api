@@ -4,6 +4,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/api/' }),
+  tagTypes: ['Category'],
   endpoints: (builder) => ({
     registerUser: builder.mutation({
       query: (userData) => ({
@@ -19,7 +20,17 @@ export const authApi = createApi({
         body: credentials,
       }),
     }),
+    deleteCategory: builder.mutation({
+      query: (id) => ({
+        url: `categories/${id}/`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Category'],
+    }),
   }),
 });
-
-export const { useRegisterUserMutation, useLoginUserMutation } = authApi;
+export const {
+  useRegisterUserMutation,
+  useLoginUserMutation,
+  useDeleteCategoryMutation, // ← новий
+} = authApi;

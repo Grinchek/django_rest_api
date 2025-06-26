@@ -1,42 +1,35 @@
-from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
 from .models import Category
-from .serializers import CategorySerializer
-from rest_framework import generics
-from django.contrib.auth.models import User
-from rest_framework.permissions import AllowAny
-from rest_framework.serializers import ModelSerializer
+from .serializers import CategorySerializer, RegisterSerializer
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user(request):
     user = request.user
+    profile = getattr(user, 'profile', None)
     return Response({
         'id': user.id,
-        'username': user.username
+        'username': user.username,
+        'profile': {
+            'phone': profile.phone if profile else '',
+            'photo': profile.photo.url if profile and profile.photo else ''
+        }
     })
 
-# Create your views here.
+
 class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
-
-class RegisterSerializer(ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['username', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -54,3 +47,12 @@ class RegisterView(APIView):
                 'token': str(refresh.access_token)
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class DeleteUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        username = user.username
+        user.delete()
+        return Response({"detail": f"User '{username}' was deleted."}, status=status.HTTP_204_NO_CONTENT)

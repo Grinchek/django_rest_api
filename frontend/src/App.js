@@ -8,6 +8,7 @@ import CreateCategoryPage from './pages/CreateCategoryPage';
 import EditCategoryPage from './pages/EditCategoryPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ProfilePage from './pages/ProfilePage';
 
 const { Header, Content } = Layout;
 
@@ -30,23 +31,26 @@ function App() {
                 </Menu.Item>
               </>
             )}
+          {user && (
+            <>
+              <Menu.Item key="categories">
+                <Link to="/">Categories</Link>
+              </Menu.Item>
+              <Menu.Item key="create">
+                <Link to="/create">Add new</Link>
+              </Menu.Item>
+              <Menu.Item key="profile">
+                <Link to="/profile">My Profile</Link>
+              </Menu.Item>
+              <Menu.Item key="user" style={{ color: 'white', cursor: 'default' }}>
+                👤 {user.username}
+              </Menu.Item>
+              <Menu.Item key="logout" onClick={() => dispatch(logout())}>
+                Logout
+              </Menu.Item>
+            </>
+          )}
 
-            {user && (
-              <>
-                <Menu.Item key="categories">
-                  <Link to="/">Categories</Link>
-                </Menu.Item>
-                <Menu.Item key="create">
-                  <Link to="/create">Add new</Link>
-                </Menu.Item>
-                <Menu.Item key="user" style={{ color: 'white', cursor: 'default' }}>
-                  👤 {user.username}
-                </Menu.Item>
-                <Menu.Item key="logout" onClick={() => dispatch(logout())}>
-                  Вийти
-                </Menu.Item>
-              </>
-            )}
           </Menu>
         </Header>
 
@@ -57,6 +61,7 @@ function App() {
             <Route path="/edit/:id" element={<EditCategoryPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Routes>
         </Content>
       </Layout>
